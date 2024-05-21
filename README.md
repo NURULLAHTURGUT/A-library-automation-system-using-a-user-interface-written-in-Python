@@ -18,6 +18,10 @@ MAIN MENU:
 
 ![Ekran görüntüsü 2024-05-21 123950](https://github.com/NURULLAHTURGUT/A-library-automation-system-using-a-user-interface-written-in-Python/assets/148002499/5ac47f08-018a-4262-ae79-cc5fa64ce0f1)
 
+LISTING SCREEN
+
+![Ekran görüntüsü 2024-05-21 124030](https://github.com/NURULLAHTURGUT/A-library-automation-system-using-a-user-interface-written-in-Python/assets/148002499/1ca8652a-1242-4358-82cf-d82c2a2e9da7)
+
 SUB MENUS
 
 
@@ -25,9 +29,6 @@ SUB MENUS
       1-BOOK ADD
       2-BOOK DELETION
       3-BOOK LISTING
-      
-      ![Ekran görüntüsü 2024-05-21 124030](https://github.com/NURULLAHTURGUT/A-library-automation-system-using-a-user-interface-written-in-Python/assets/148002499/1ca8652a-1242-4358-82cf-d82c2a2e9da7)
-
 
      2A - MEMBER ADDITION MENU:
        1-ADDING A MEMBER

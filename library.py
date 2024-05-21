@@ -1,9 +1,10 @@
 import os
+import customtkinter
 import tkinter as tk
 from tkinter import messagebox
-import time
+from datetime import datetime
+from tkinter import ttk
 import struct
-
 # Define class for Book
 class Book:
     def __init__(self, barcode, bookname, author, publishing_house, release_date, inventory):
@@ -50,6 +51,7 @@ def add_book_interface():
             file.write(f"{barcode},{bookname},{author},{publishing_house},{release_date},{inventory}\n")
         
         messagebox.showinfo("Success", "Book registration completed.")
+        add_book_window.destroy()
 
     # Create the book addition interface
     add_book_window = tk.Tk()
@@ -90,23 +92,24 @@ def add_book_interface():
 def delete_book_interface():
     # Function to handle book deletion
     def delete_book():
-        bbarcode = bbarcode_entry.get()
+        Book.barcode = bbarcode_entry.get()
         result = 0
         try:
             with open("Books.data", "r") as file:
                 lines = file.readlines()
             with open("backup.data", "w") as new_file:
                 for line in lines:
-                    if str(bbarcode) not in line:
+                    if str(Book.barcode) not in line:
                         new_file.write(line)
                     else:
                         result = 1
             if result == 0:
-                messagebox.showerror("Error", f"{bbarcode} BOOK WITH BARCODE NUMBER NOT FOUND.")
+                messagebox.showerror("Error", f"{Book.barcode} BOOK WITH BARCODE NUMBER NOT FOUND.")
             else:
                 os.remove("Books.data")
                 os.rename("backup.data", "Books.data")
-                messagebox.showinfo("Success", f"{bbarcode} BOOK WITH BARCODE NUMBER DELETED.")
+                messagebox.showinfo("Success", f"{Book.barcode} BOOK WITH BARCODE NUMBER DELETED.")
+                delete_book_window.destroy()
         except FileNotFoundError:
             messagebox.showerror("Error", "Books.data file not found.")
 
@@ -141,7 +144,7 @@ def book_transactions():
     
     
     window = tk.Tk()
-    window.geometry("750x400")
+    window.geometry("850x400")
     window.title("Library Management System")
     window.configure(bg="#202227")
     
@@ -157,23 +160,52 @@ def book_transactions():
 
 # Function to list books
 def book_list_interface():
-    # Function to list books
-    def book_list():
-        book_list_window = tk.Toplevel()
-        book_list_window.geometry("800x400")
-        book_list_window.configure(bg="#202227")
-        book_list_window.title("Book List")
-        try:
-            with open("Books.data", "r") as file:
-                tk.Label(book_list_window, text="%-20s%-25s%-25s%-25s%-25s%-30s" % ("BOOK-BARCODE", "BOOK-NAME", "BOOK-AUTHOR", "BOOK-PUBLISHER", "BOOK-PUBLICATION DATE", "BOOK-STOCK"),font=('Arial',9), bg="#202227", fg="#4c41c6").pack()
-                for line in file:
-                    data = line.strip().split(",")
-                    tk.Label(book_list_window, text="%-20s%-35s%-35s%-35s%-45s%-25s" % tuple(data),bg="#202227", fg="#f4f4f4",font=('Arial',9)).pack()
-        except FileNotFoundError:
-            messagebox.showerror("Error", "Books.data file not found.")
+ def load_books_from_file():
+     try:
+        with open("Books.data", "r") as file:
+            for line in file:
+                data = line.strip().split(",")
+                if len(data) == 6:
+                    tree.insert('', 'end', values=(data[0], data[1], data[2], data[3],data[4],data[5]))
+     except FileNotFoundError:
+         messagebox.showerror("Error", "Books.data file not found.")
 
-    book_list()
+ # Create main window
+ root = tk.Tk()
+ root.title("Kitap Listesi")
+ # Stil oluştur
+ style = ttk.Style(root)
+ style.theme_use("clam")
 
+ # Treeview stilini ayarla
+ style.configure("Treeview",
+                background="#202227",
+                foreground="white",
+                fieldbackground="#202227",
+                rowheight=25,
+                font=('Arial', 12))
+
+ style.map('Treeview', background=[('selected', 'blue')])
+
+ # Treeview başlık stilini ayarla
+ style.configure("Treeview.Heading",
+                background="black",
+                foreground="white",
+                font=('Arial', 12, 'bold'))
+ # Create treeview
+ tree = ttk.Treeview(root, columns=('BOOK-BARCODE', 'BOOK-NAME', 'BOOK-AUTHOR', 'BOOK-PUBLISHER','BOOK-PUBLICATION DATE','BOOK-STOCK'), show='headings')
+ tree.heading('BOOK-BARCODE', text='BOOK-BARCODE')
+ tree.heading('BOOK-NAME', text='BOOK-NAME')
+ tree.heading('BOOK-AUTHOR', text='BOOK-AUTHOR')
+ tree.heading('BOOK-PUBLISHER', text='BOOK-PUBLISHER')
+ tree.heading('BOOK-PUBLICATION DATE',text='BOOK-PUBLICATION DATE')
+ tree.heading('BOOK-STOCK',text='BOOK-STOCK')
+ tree.pack(pady=10,padx=10)
+
+ # Load books from file when the program starts
+ load_books_from_file()
+
+ root.mainloop()
 # Function for adding a member
 def add_member():
     def register_member():
@@ -263,21 +295,51 @@ def delete_member():
     window.mainloop()
 
 def member_list():
-    window = tk.Tk()
-    window.geometry("900x400")
-    window.configure(bg="#202227")
-    window.title("Member List")
-
-    try:
+    def load_books_from_file():
+     try:
         with open("members.data", "r") as file:
-            tk.Label(window, text="%-20s%-30s%-20s%-20s%-20s%-20s" % ("MEMBER IDENTIFICATION NO-", "MEMBER NAME-SURNAME-", "MEMBER DATE OF BIRTH-", "MEMBER PHONE NUMBER-", "MEMBER ADDRESS-", "MEMBER SITUATION"),font=('Arial',9), bg="#202227", fg="#4c41c6").pack()
             for line in file:
                 data = line.strip().split(",")
-                tk.Label(window, text="%-30s%-40s%-30s%-30s%-30s%-30s" % tuple(data),bg="#202227", fg="#f4f4f4",font=('Arial',9)).pack()
-    except FileNotFoundError:
-        tk.Label(window, text="members.data file not found.").pack()
+                if len(data) == 6:
+                    tree.insert('', 'end', values=(data[0], data[1], data[2], data[3],data[4],data[5]))
+     except FileNotFoundError:
+         print("Error", "members.data file not found.")
 
-    window.mainloop()
+    # Create main window
+    root = tk.Tk()
+    root.title("Member List")
+    # Stil oluştur
+    style = ttk.Style(root)
+    style.theme_use("clam")
+
+    # Treeview stilini ayarla
+    style.configure("Treeview",
+                background="#202227",
+                foreground="white",
+                fieldbackground="#202227",
+                rowheight=25,
+                font=('Arial', 12))
+
+    style.map('Treeview', background=[('selected', 'blue')])
+    # Treeview başlık stilini ayarla
+    style.configure("Treeview.Heading",
+                background="black",
+                foreground="white",
+                font=('Arial', 12, 'bold'))
+    # Create treeview
+    tree = ttk.Treeview(root, columns=('MEMBER ID', 'MEMBER NAME-SURNAME', 'MEMBER DATE OF BIRTH', 'MEMBER PHONE NUMBER','MEMBER ADDRESS','MEMBER SITUATION'), show='headings')
+    tree.heading('MEMBER ID', text='MEMBER IDENTIFICATION NO')
+    tree.heading('MEMBER NAME-SURNAME', text='MEMBER NAME-SURNAME')
+    tree.heading('MEMBER DATE OF BIRTH', text='MEMBER DATE OF BIRTH')
+    tree.heading('MEMBER PHONE NUMBER', text='MEMBER PHONE NUMBER')
+    tree.heading('MEMBER ADDRESS',text='MEMBER ADDRESS')
+    tree.heading('MEMBER SITUATION',text='MEMBER SITUATION')
+    tree.pack(pady=10,padx=10)
+
+    # Load books from file when the program starts
+    load_books_from_file()
+
+    root.mainloop()
 
 def member_transactions():
     def handle_book_transactions():
@@ -293,7 +355,7 @@ def member_transactions():
         member_list()
 
     window = tk.Tk()
-    window.geometry("800x450")
+    window.geometry("850x450")
     window.configure(bg="#202227")
     window.title("Member Transactions")
 
@@ -306,19 +368,50 @@ def member_transactions():
 
 # Function to list borrowed books
 def lend_list_interface():
-    lend_list_window = tk.Tk()
-    lend_list_window.title("Borrowed Books List")
-    Counter = 0
-    try:
-        with open("lending_books.data", "r") as file:
-            tk.Label(lend_list_window, text="%-20s%-20s%-20s" % ("IDENTIFICATION NO.", "BARCODE", "SITUATION")).pack()
-            for line in file:
-                data = line.strip().split(",")
-                tk.Label(lend_list_window, text="%-20s%-20s%-20s" % tuple(data)).pack()
-                Counter += 1
-        tk.Label(lend_list_window, text="NUMBER OF BORROWED BOOKS: " + str(Counter)).pack()
-    except FileNotFoundError:
-        messagebox.showerror("Error", "lending_books.data file not found.")
+    # Pencereyi oluşturma
+   lend_list_window = tk.Tk()
+   lend_list_window.geometry("800x450")
+   lend_list_window.title("Borrowed Books List")
+   lend_list_window.configure(bg="#202227")
+
+   # Treeview için bir çerçeve oluşturma
+   frame = tk.Frame(lend_list_window, bg="#202227")
+   frame.pack(fill=tk.BOTH, expand=True)
+
+   # Treeview bileşenini oluşturma
+   columns = ("IDENTIFICATION NO.", "BARCODE", "GIVEN TIME")
+   tree = ttk.Treeview(frame, columns=columns, show="headings")
+   tree.heading("IDENTIFICATION NO.", text="IDENTIFICATION NO.")
+   tree.heading("BARCODE", text="BARCODE")
+   tree.heading("GIVEN TIME", text="GIVEN TIME")
+
+   # Treeview sütun genişlikleri
+   tree.column("IDENTIFICATION NO.", width=200)
+   tree.column("BARCODE", width=200)
+   tree.column("GIVEN TIME", width=200)
+
+   tree.pack(fill=tk.BOTH, expand=True)
+
+   # Dosyayı okuyup Treeview'a ekleme
+   Counter = 0
+   try:
+      with open("lending_books.data", "r") as file:
+         for line in file:
+             data2 = line.strip().split(",")
+             del data2[-1]
+             tree.insert("", "end", values=tuple(data2))
+             Counter += 1
+    
+       # Toplam ödünç alınan kitap sayısı
+      total_label = tk.Label(lend_list_window, text="NUMBER OF BORROWED BOOKS: " + str(Counter),
+                           bg="#202227", fg="#f4f4f4", font=('Arial', 9))
+      total_label.pack(padx=20, pady=40)
+   except FileNotFoundError:
+       messagebox.showerror("Error", "lending_books.data file not found.")
+
+     # Pencereyi çalıştırın
+   lend_list_window.mainloop()
+
 
 #STOCK UPDATE FUNCTION
 def update_stock(barcode, number):
@@ -340,7 +433,7 @@ def lend_book():
     # Function to handle the lending process
     def handle_lending():
         memberi_n = member_id_entry.get()
-        book_barcode = book_barcode_entry.get()
+        book_barcode = int(book_barcode_entry.get())
         
         # Check if member ID exists
         uresult = 0
@@ -382,7 +475,8 @@ def lend_book():
             return
 
         to_use = to_use_entry.get()
-        delivery_date = time.time()
+        current_date = datetime.now()
+        delivery_date = current_date.strftime("%Y-%m-%d")
 
         # Save lending information
         try:
@@ -449,104 +543,151 @@ def update_contact(i_nptr):
 
 def borrow_back():
     window = tk.Tk()
+    window.geometry("400x300")
+    window.configure(bg="#202227")
     window.title("LOAN BOOK RETURN SCREEN")
 
-    tk.Label(window, text="MEMBER ID NUMBER: ").grid(row=0, column=0)
+    tk.Label(window, text="MEMBER ID NUMBER: ", bg="#202227", fg="#f4f4f4").grid(padx=20,pady=20,row=0, column=0)
     member_id_entry = tk.Entry(window)
     member_id_entry.grid(row=0, column=1)
 
-    tk.Label(window, text="BOOK BARCODE: ").grid(row=1, column=0)
+    tk.Label(window, text="BOOK BARCODE: ", bg="#202227", fg="#f4f4f4").grid(padx=20,pady=20,row=1, column=0)
     book_barcode_entry = tk.Entry(window)
     book_barcode_entry.grid(row=1, column=1)
 
     def check_borrowed():
         member_id = member_id_entry.get()
         book_barcode = int(book_barcode_entry.get())
-
-        result = False
-        counter = 0
-        borrowed_list = []
-
+        situation=0
+        uresult = 0
+        delivery_date=None
+        borrow_date=None
         try:
-            with open("lending_books.data", "r+b") as file:
-                while True:
-                    try:
-                        borrowed_obj = Borrowed(*struct.unpack("s30id", file.read(38)))
-                        borrowed_list.append(borrowed_obj)
-                    except struct.error:
+            with open("lending_books.data","r") as file:
+                for line in file:
+                    data=line.strip().split(",")
+                    if data[0]==member_id and int(data[1])==book_barcode:
+                        uresult=1
                         break
-
-                for borrowed_obj in borrowed_list:
-                    if borrowed_obj.member_id == member_id and borrowed_obj.book_barcode == book_barcode:
-                        result = True
-                        break
-                    counter += 1
-
-                if not result:
-                    messagebox.showwarning("Warning", f"{member_id} WITH ID NUMBER OR {book_barcode} REGISTRATION WITH BARCODE NUMBER NOT FOUND.")
-                else:
-                    borrowed_obj.return_date = time.time()
-                    seconds = borrowed_obj.return_date - borrowed_obj.delivery_date
-                    minutes = seconds / 60
-                    hours = minutes / 60
-                    days = hours / 24
-                    borrowed_obj.day_of_use = days
-                    print("NUMBER OF DAYS USED:", days)
-                    borrowed_obj.delay_days = borrowed_obj.to_use - borrowed_obj.day_of_use
-                    if borrowed_obj.delay_days > 5:
-                        borrowed_obj.situation = -1
-                    else:
-                        borrowed_obj.situation = 1
-
-                    file.seek(counter * 38)
-                    file.write(struct.pack("s30id5f", borrowed_obj.member_id.encode(), borrowed_obj.book_barcode, borrowed_obj.delivery_date, borrowed_obj.to_use, borrowed_obj.return_date, borrowed_obj.day_of_use, borrowed_obj.delay_days, borrowed_obj.situation))
-
-                    print("BORROWED BOOK TAKEN BACK.")
-                    update_stock(borrowed_obj.book_barcode, 1)
-
-                    if borrowed_obj.situation == -1:
-                        update_contact(member_id)
-
         except FileNotFoundError:
-            messagebox.showerror("Error", "lending_books.data file not found.")
+                messagebox.showerror("Error","Data file not found")
+        if uresult==0:
+                messagebox.showwarning("Warning", f"{member_id} WITH ID NUMBER OR {book_barcode} REGISTRATION WITH BARCODE NUMBER NOT FOUND.")
+                return
+        else:
+            with open("lending_books.data","r") as file:
+                for line in file:
+                    data=line.strip().split(",")
+                    if data[0] == member_id and book_barcode == int(data[1]):
+                       delivery_date=data[-1]
+                       break
+        if delivery_date is not None:
+            return_date = datetime.now()
+            borrow_date = datetime.strptime(delivery_date, "%Y-%m-%d")
+            days_borrowed = (return_date - borrow_date).days
+            result = 0
+            try:
+               with open("lending_books.data", "r") as file:
+                 lines = file.readlines()
+               with open("new.data", "w") as new_file:
+                 for line in lines:
+                     if str(member_id) not in line:
+                        new_file.write(line)
+                     else:
+                        result = 1
+               if result == 0:
+                    messagebox.showerror("Error", f"{member_id} BOOK WITH BARCODE NUMBER NOT FOUND.")
+               else:
+                  os.remove("lending_books.data")
+                  os.rename("new.data", "lending_books.data")
+                  messagebox.showinfo("Success", f"{member_id} BOOK WITH BARCODE NUMBER DELETED.")
+            except FileNotFoundError:
+                 messagebox.showerror("Error", "Books.data file not found.")
+            update_stock(book_barcode,1)
+            if days_borrowed>21:
+                situation=-1
+            else:
+                situation=1
 
-        window.destroy()
+            if situation == -1:
+                update_contact(member_id)
+        else:
+            messagebox.showerror("Warning","kayıt bulunamadı")
+         
 
-    tk.Button(window, text="Take Back", command=check_borrowed).grid(row=2, columnspan=2)
-
+    tk.Button(window, text="Take Back", command=check_borrowed, bg="#18a0fb", fg="#f4f4f4").grid(row=3, column=0, columnspan=2,padx=20,pady=20)
     window.mainloop()
 
-
-
-# Function for main menu
-def main_menu():
+def homepage():
     def handle_book_transactions():
-        window.destroy()  # Close the current window
+        windowhome.destroy()  # Close the current window
         book_transactions()
 
     def handle_member_transactions():
-        window.destroy()  
+        windowhome.destroy()  
         member_transactions()
 
     def handle_borrowing_procedures():
-        window.destroy()  
+        windowhome.destroy()  
         borrowed_operations()
     
     
-    window = tk.Tk()
-    window.geometry("700x400")
-    window.title("Library Management System")
-    window.configure(bg="#202227")
+    windowhome = tk.Tk()
+    windowhome.geometry("850x500")
+    windowhome.title("Library Management System")
+    windowhome.configure(bg="#202227")
     
-    tk.Label(window, text="Library Management System", font=('Arial',18), bg="#202227", fg="#f4f4f4").pack(padx=20,pady=20,anchor="nw")
-    Label = tk.Label(window, text="explore categories ↓",font=('Arial',10), bg="#202227", fg="#f4f4f4").pack(padx=20,pady=20,anchor="nw")
+    tk.Label(windowhome, text="Library Management System", font=('Arial',18), bg="#202227", fg="#f4f4f4").pack(padx=20,pady=20,anchor="nw")
+    Label = tk.Label(windowhome, text="explore categories ↓",font=('Arial',10), bg="#202227", fg="#f4f4f4").pack(padx=20,pady=20,anchor="nw")
 
-    tk.Button(window, text="Book Transactions", command=book_transactions,width=20, height=7, bg="#18a0fb", fg="#f4f4f4").pack(side=tk.LEFT,padx=20,pady=20)
-    tk.Button(window, text="Member Transactions", command=member_transactions,width=20, height=7, bg="#18a0fb", fg="#f4f4f4").pack(side=tk.LEFT,padx=20,pady=20)
-    tk.Button(window, text="Book Borrowing Procedures", command=borrowed_operations,width=20, height=7, bg="#18a0fb", fg="#f4f4f4").pack(side=tk.LEFT,padx=20,pady=20)
-    tk.Button(window, text="Exit", command=window.destroy,width=20, height=7, bg="#18a0fb", fg="#f4f4f4").pack(side=tk.LEFT,padx=20,pady=20)
+    tk.Button(windowhome, text="Book Transactions", command=book_transactions,width=20, height=7, bg="#18a0fb", fg="#f4f4f4").pack(side=tk.LEFT,padx=20,pady=20)
+    tk.Button(windowhome, text="Member Transactions", command=member_transactions,width=20, height=7, bg="#18a0fb", fg="#f4f4f4").pack(side=tk.LEFT,padx=20,pady=20)
+    tk.Button(windowhome, text="Book Borrowing Procedures", command=borrowed_operations,width=20, height=7, bg="#18a0fb", fg="#f4f4f4").pack(side=tk.LEFT,padx=20,pady=20)
+    tk.Button(windowhome, text="Exit", command=windowhome.destroy,width=20, height=7, bg="#18a0fb", fg="#f4f4f4").pack(side=tk.LEFT,padx=20,pady=20)
 
-    window.mainloop()
+    windowhome.mainloop()
+
+# Function for main menu
+def main_menu():
+    customtkinter.set_appearance_mode("System")  
+    customtkinter.set_default_color_theme("blue")
+    def login_event():
+        if entry_1.get()=="admin" and entry_2.get()=="123": #This is just a simple demo verification,                                            
+            print("Password matched!")      
+            root_login.destroy() #Destroy the login window after the verification
+            messagebox.showinfo("Login Successful", "Welcome, Admin!")
+            homepage() #Make the new_window
+        else: #If password doesn't match
+            messagebox.showerror("Login Failed", "Invalid username or password")
+            entry_1.configure(text_color="red")
+            entry_2.configure(text_color="red")
+            print("Wrong password/username!")
+
+    customtkinter.set_appearance_mode("dark")       
+    #Define the login page window          
+    root_login = customtkinter.CTk() 
+    root_login.geometry(f"{500}x{500}")
+    root_login.title("LOGIN PAGE")
+    #Add some widgets for login page
+    frame = customtkinter.CTkFrame(master=root_login,width=450, height=450, corner_radius=10)
+    frame.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+
+    label_1 = customtkinter.CTkLabel(master=frame, width=400, height=120, corner_radius=10,
+                                     fg_color=("gray70", "gray35"), text="Welcome to Library Automation System \n\nPlease Login! \n\nUsername=admin, Pass=123")
+    label_1.place(relx=0.5, rely=0.3, anchor=tk.CENTER)
+
+    entry_1 = customtkinter.CTkEntry(master=frame, corner_radius=20, width=400, placeholder_text="Username")
+    entry_1.place(relx=0.5, rely=0.52, anchor=tk.CENTER)
+
+    entry_2 = customtkinter.CTkEntry(master=frame, corner_radius=20, width=400, show="*", placeholder_text="Password")
+    entry_2.place(relx=0.5, rely=0.6, anchor=tk.CENTER)
+
+    button_login = customtkinter.CTkButton(master=frame, text="LOGIN", corner_radius=6, command=login_event, width=400)
+    button_login.place(relx=0.5, rely=0.7, anchor=tk.CENTER)
+
+    root_login.mainloop()
+
+
 
 def borrowed_operations():
     
@@ -562,11 +703,11 @@ def borrowed_operations():
         lend_list_interface()
 
   windowt = tk.Tk()
-  windowt.geometry("700x400")
+  windowt.geometry("800x400")
   windowt.title("Borrowed Book Transactions")
   windowt.configure(bg="#202227")
   tk.Label(windowt, text="LOAN BOOK TRANSACTIONS SCREEN", font=('Arial',18), bg="#202227", fg="#f4f4f4").pack(padx=20,pady=20)
-  Label = tk.Label(windowt, text="explore categories ↓ (BAZI İŞLEVLER ÇALIŞMIYOR OLABİLİR BUNU DÜZELTMEK İÇİN ÇALIŞIYORUM)",font=('Arial',10), bg="#202227", fg="#f4f4f4").pack(padx=20,pady=20,anchor="nw")
+  Label = tk.Label(windowt, text="explore categories ↓ ",font=('Arial',10), bg="#202227", fg="#f4f4f4").pack(padx=20,pady=20,anchor="nw")
   tk.Button(windowt, text="LEND A BOOK", command=lend_book,width=25, height=7, bg="#18a0fb", fg="#f4f4f4").pack(side=tk.LEFT,padx=20,pady=20)
   tk.Button(windowt, text="TAKE BACK THE BORROWED BOOK", command=borrow_back,width=25, height=7, bg="#18a0fb", fg="#f4f4f4").pack(side=tk.LEFT,padx=20,pady=20)
   tk.Button(windowt, text="LIST BORROWED BOOKS", command=lend_list_interface,width=25, height=7, bg="#18a0fb", fg="#f4f4f4").pack(side=tk.LEFT,padx=20,pady=20)
@@ -575,5 +716,4 @@ def borrowed_operations():
 
 if __name__ == "__main__":
     main_menu()
-
 

@@ -1,6 +1,6 @@
 LIBRARY AUTOMATION INCLUDES FEATURES SUCH AS MEMBER TRANSACTIONS, BOOK TRANSACTIONS, BOOK LENDING.
 
-Click to install the library automation system desktop application :  [here](https://github.com/NURULLAHTURGUT/A-library-automation-system-using-a-user-interface-written-in-Python/releases/download/V.0.1/Library.exe)
+Click to install the library automation system desktop application :  [Click Download](https://github.com/NURULLAHTURGUT/A-library-automation-system-using-a-user-interface-written-in-Python/releases/download/V.0.1/Library.exe)
 
 
 ![Ekran görüntüsü 2024-05-21 123814](https://github.com/NURULLAHTURGUT/A-library-automation-system-using-a-user-interface-written-in-Python/assets/148002499/8d8196ab-8dad-4b29-8cda-93c53615a729)
